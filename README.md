@@ -1,4 +1,4 @@
-# ImgAlte FE
+# ImgAlt FE
 
 This is a web app built with **Next.js** that allows users to upload images or provide image URLs and receive **generated img alt text descriptions** 
 using OpenAI's image model. It's perfect for improving accessibility and better search optimization practices in image-heavy websites.
