@@ -10,14 +10,14 @@ export async function POST(req: Request) {
     const { imageBase64 } = await req.json();
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o', // ✅ NEW MODEL
+      model: 'gpt-4o', 
       messages: [
         {
           role: 'user',
           content: [
             {
               type: 'text',
-              text: 'Describe this image for an alt attribute in HTML, be concise and specific.',
+              text: 'Describe this image for an alt attribute in HTML, in plain text, be concise and specific.',
             },
             {
               type: 'image_url',
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       max_tokens: 100,
     });
 
-    const altText = response.choices[0]?.message?.content ?? 'No description generated';
+    const altText = response.choices[0]?.message?.content ?? 'No description generated.';
     return NextResponse.json({ alt: altText });
   } catch (error) {
     console.error('OpenAI error:', error);
