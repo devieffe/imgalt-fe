@@ -80,7 +80,7 @@ export default function AltTextGenerator() {
           onClick={handleUrlSubmit}
           className="bg-blue-800 hover:bg-blue-900 text-white font-semibold px-4 py-2 rounded w-32 flex-shrink-0"
         >
-          Load
+          Add URL
         </button>
       </div>
 
