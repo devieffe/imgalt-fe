@@ -188,11 +188,10 @@ export default function AltTextGenerator() {
               {/* copy button */}
               <button
                 onClick={handleCopy}
-                className="absolute top-2 right-2 p-2 border rounded"
+                className="absolute top-2 right-2 p-1 text-xl cursor-pointer"
               >
                 {copied ? '✓' : '⧉'}
               </button>
-
               <p>{altText}</p>
             </div>
           )
