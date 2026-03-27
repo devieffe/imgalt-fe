@@ -13,29 +13,38 @@ export default function AltTextGenerator() {
   useEffect(() => setHydrated(true), []);
 
   const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+  const allowedExtensions = /\.(jpg|jpeg|png)$/i;
 
   const generateAltText = async (src: string) => {
     setAltText('');
     setError('');
     setLoading(true);
+
     try {
       const res = await fetch('/api/imgalt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageBase64: src }),
       });
+
       const data = await res.json();
+
       if (res.ok) setAltText(data.alt || 'No alt text generated.');
       else setError(data.error || 'Failed to generate alt text.');
     } catch {
       setError('Something went wrong.');
     }
+
     setLoading(false);
   };
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setError('');
+    setAltText('');
+
     if (!allowedTypes.includes(file.type)) {
       setError('Only .jpg, .jpeg, and .png files are supported.');
       return;
@@ -50,81 +59,131 @@ export default function AltTextGenerator() {
     reader.readAsDataURL(file);
   };
 
-  const handleUrlSubmit = () => {
-    if (!imageUrlInput.trim()) return;
-    if (!imageUrlInput.match(/\.(jpg|jpeg|png)$/i)) {
+  const validateAndLoadImageUrl = async (urlString: string) => {
+    setError('');
+    setAltText('');
+
+    let parsedUrl: URL;
+
+    try {
+      parsedUrl = new URL(urlString);
+    } catch {
+      setError('Please enter a valid image URL.');
+      return;
+    }
+
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      setError('Only http and https image URLs are allowed.');
+      return;
+    }
+
+    if (!allowedExtensions.test(parsedUrl.pathname)) {
       setError('Only image URLs ending in .jpg, .jpeg, or .png are allowed.');
       return;
     }
-    setImageSrc(imageUrlInput);
-    generateAltText(imageUrlInput);
+
+    try {
+      const img = new Image();
+
+      const loadPromise = new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject();
+      });
+
+      img.src = urlString;
+      await loadPromise;
+
+      setImageSrc(urlString);
+      generateAltText(urlString);
+    } catch {
+      setError('The image URL does not exist, cannot be loaded, or is blocked.');
+    }
+  };
+
+  const handleUrlSubmit = async () => {
+    const trimmed = imageUrlInput.trim();
+    if (!trimmed) return;
+
+    await validateAndLoadImageUrl(trimmed);
   };
 
   if (!hydrated) return null;
 
+  const baseButton =
+    'bg-black text-white font-semibold px-4 py-2 rounded text-center w-full border-2 border-white';
+
+  const panelClass = 'px-4 py-2 rounded border shadow-sm overflow-hidden';
+
+  const isUrlReady = imageUrlInput.trim().length > 0;
+
   return (
-    <div className="p-6 max-w-xl mx-auto space-y-4">
-      <h1 className="text-2xl font-bold">Generate alt text</h1>
+    <div className="p-6 max-w-xl mx-auto">
+      <h1 className="text-2xl font-bold mb-3">Generate alt text</h1>
 
-      {/* URL input */}
-      <div className="flex gap-3">
-        <input
-          type="text"
-          value={imageUrlInput}
-          onChange={(e) => setImageUrlInput(e.target.value)}
-          placeholder="Paste image URL (.jpg, .jpeg, .png)"
-          className="flex-1 border rounded p-2"
-          onKeyDown={(e) => e.key === 'Enter' && handleUrlSubmit()}
-        />
-        <button
-          onClick={handleUrlSubmit}
-          className="bg-blue-800 hover:bg-blue-900 text-white font-semibold px-4 py-2 rounded w-32 flex-shrink-0"
-        >
-          Add URL
-        </button>
-      </div>
-
-      {/* File upload */}
-      <div>
-        <label>
+      <div className="space-y-3">
+        {/* URL input + button */}
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_128px] gap-3 w-full">
           <input
-            type="file"
-            accept=".jpg,.jpeg,.png"
-            onChange={handleUpload}
-            className="hidden"
+            type="text"
+            value={imageUrlInput}
+            onChange={(e) => setImageUrlInput(e.target.value)}
+            placeholder="Paste image URL (.jpg, .jpeg, .png)"
+            className="w-full border rounded px-4 py-2 min-w-0"
+            onKeyDown={(e) => e.key === 'Enter' && handleUrlSubmit()}
           />
-          <p className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded w-full text-center cursor-pointer">
-            Upload a file
-          </p>
-        </label>
-      </div>
 
-      {/* Error */}
-      {error && (
-        <div className="mt-4 p-4 rounded border shadow-sm overflow-hidden">
-          {error}
+          <button
+            onClick={handleUrlSubmit}
+            disabled={!isUrlReady}
+            className={`${baseButton} ${isUrlReady
+                ? 'cursor-pointer opacity-100'
+                : 'cursor-not-allowed opacity-80'
+              }`}
+          >
+            Add URL
+          </button>
         </div>
-      )}
 
-      {/* Image preview */}
-      {imageSrc && (
-        <div className="mt-4 p-4 rounded border shadow-sm overflow-hidden max-h-400px">
-          <img src={imageSrc} alt="Image" className="max-h-400px mx-auto" />
+        {/* File upload */}
+        <div className="w-full">
+          <label className="block w-full">
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png"
+              onChange={handleUpload}
+              className="hidden"
+            />
+            <p className={`${baseButton} cursor-pointer`}>
+              Upload a file
+            </p>
+          </label>
         </div>
-      )}
 
-      {/* Loading / Alt text */}
-      {loading ? (
-        <div className="mt-4 p-4 rounded border shadow-sm overflow-hidden">
-          Generating alt ...
-        </div>
-      ) : (
-        altText && (
-          <div className="mt-4 p-4 rounded border shadow-sm overflow-hidden">
-            <p>{altText}</p>
+        {/* Error */}
+        {error && <div className={panelClass}>{error}</div>}
+
+        {/* Image preview */}
+        {imageSrc && (
+          <div className={panelClass}>
+            <img
+              src={imageSrc}
+              alt="Image"
+              className="max-h-[400px] mx-auto"
+            />
           </div>
-        )
-      )}
+        )}
+
+        {/* Loading / Alt text */}
+        {loading ? (
+          <div className={panelClass}>Generating alt ...</div>
+        ) : (
+          altText && (
+            <div className={panelClass}>
+              <p>{altText}</p>
+            </div>
+          )
+        )}
+      </div>
     </div>
   );
 }
