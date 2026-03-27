@@ -9,6 +9,7 @@ export default function AltTextGenerator() {
   const [altText, setAltText] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => setHydrated(true), []);
 
@@ -18,6 +19,7 @@ export default function AltTextGenerator() {
   const generateAltText = async (src: string) => {
     setAltText('');
     setError('');
+    setCopied(false);
     setLoading(true);
 
     try {
@@ -44,6 +46,7 @@ export default function AltTextGenerator() {
 
     setError('');
     setAltText('');
+    setCopied(false);
 
     if (!allowedTypes.includes(file.type)) {
       setError('Only .jpg, .jpeg, and .png files are supported.');
@@ -62,6 +65,7 @@ export default function AltTextGenerator() {
   const validateAndLoadImageUrl = async (urlString: string) => {
     setError('');
     setAltText('');
+    setCopied(false);
 
     let parsedUrl: URL;
 
@@ -96,23 +100,31 @@ export default function AltTextGenerator() {
       setImageSrc(urlString);
       generateAltText(urlString);
     } catch {
-      setError('The image URL does not exist, cannot be loaded, or is blocked.');
+      setError('The image URL does not exist or cannot be loaded.');
     }
   };
 
   const handleUrlSubmit = async () => {
     const trimmed = imageUrlInput.trim();
     if (!trimmed) return;
-
     await validateAndLoadImageUrl(trimmed);
+  };
+
+  const handleCopy = async () => {
+    if (!altText) return;
+
+    await navigator.clipboard.writeText(altText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1200);
   };
 
   if (!hydrated) return null;
 
+  // styles
+  const inputClass = 'w-full border rounded px-4 py-2 min-w-0';
   const baseButton =
-    'bg-black text-white font-semibold px-4 py-2 rounded text-center w-full border-2 border-white';
-
-  const panelClass = 'px-4 py-2 rounded border shadow-sm overflow-hidden';
+    'bg-black text-white font-semibold rounded text-center w-full border-2 border-white px-4 py-2';
+  const panelClass = 'border rounded shadow-sm p-4 relative';
 
   const isUrlReady = imageUrlInput.trim().length > 0;
 
@@ -121,14 +133,14 @@ export default function AltTextGenerator() {
       <h1 className="text-2xl font-bold mb-3">Generate alt text</h1>
 
       <div className="space-y-3">
-        {/* URL input + button */}
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr_128px] gap-3 w-full">
+        {/* URL */}
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_128px] gap-3">
           <input
             type="text"
             value={imageUrlInput}
             onChange={(e) => setImageUrlInput(e.target.value)}
-            placeholder="Paste image URL (.jpg, .jpeg, .png)"
-            className="w-full border rounded px-4 py-2 min-w-0"
+            placeholder="Paste image URL"
+            className={inputClass}
             onKeyDown={(e) => e.key === 'Enter' && handleUrlSubmit()}
           />
 
@@ -136,49 +148,51 @@ export default function AltTextGenerator() {
             onClick={handleUrlSubmit}
             disabled={!isUrlReady}
             className={`${baseButton} ${isUrlReady
-                ? 'cursor-pointer opacity-100'
-                : 'cursor-not-allowed opacity-80'
+              ? 'cursor-pointer opacity-100'
+              : 'cursor-not-allowed opacity-80'
               }`}
           >
             Add URL
           </button>
         </div>
 
-        {/* File upload */}
-        <div className="w-full">
-          <label className="block w-full">
-            <input
-              type="file"
-              accept=".jpg,.jpeg,.png"
-              onChange={handleUpload}
-              className="hidden"
-            />
-            <p className={`${baseButton} cursor-pointer`}>
-              Upload a file
-            </p>
-          </label>
-        </div>
+        {/* Upload */}
+        <label className="block">
+          <input
+            type="file"
+            accept=".jpg,.jpeg,.png"
+            onChange={handleUpload}
+            className="hidden"
+          />
+          <div className={`${baseButton} cursor-pointer text-center`}>
+            Upload file
+          </div>
+        </label>
 
         {/* Error */}
         {error && <div className={panelClass}>{error}</div>}
 
-        {/* Image preview */}
+        {/* Image */}
         {imageSrc && (
           <div className={panelClass}>
-            <img
-              src={imageSrc}
-              alt="Image"
-              className="max-h-[400px] mx-auto"
-            />
+            <img src={imageSrc} className="max-h-[400px] mx-auto" />
           </div>
         )}
 
-        {/* Loading / Alt text */}
+        {/* Loading / Result */}
         {loading ? (
-          <div className={panelClass}>Generating alt ...</div>
+          <div className={panelClass}>Generating alt...</div>
         ) : (
           altText && (
             <div className={panelClass}>
+              {/* copy button */}
+              <button
+                onClick={handleCopy}
+                className="absolute top-2 right-2 p-2 border rounded"
+              >
+                {copied ? '✓' : '⧉'}
+              </button>
+
               <p>{altText}</p>
             </div>
           )
