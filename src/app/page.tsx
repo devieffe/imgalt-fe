@@ -72,7 +72,7 @@ export default function AltTextGenerator() {
     try {
       parsedUrl = new URL(urlString);
     } catch {
-      setError('Please enter a valid image URL.');
+      setError('Enter a valid image URL.');
       return;
     }
 
@@ -100,7 +100,7 @@ export default function AltTextGenerator() {
       setImageSrc(urlString);
       generateAltText(urlString);
     } catch {
-      setError('The image URL does not exist or cannot be loaded.');
+      setError('The image URL doesn\'t exist or cannot be loaded.');
     }
   };
 
@@ -113,18 +113,25 @@ export default function AltTextGenerator() {
   const handleCopy = async () => {
     if (!altText) return;
 
-    await navigator.clipboard.writeText(altText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
+    try {
+      await navigator.clipboard.writeText(altText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      setError('Failed to copy alt text.');
+    }
   };
 
   if (!hydrated) return null;
 
-  // styles
-  const inputClass = 'w-full border rounded px-4 py-2 min-w-0';
+  const inputClass =
+    'w-full min-w-0 rounded border border-[#ddd] px-4 py-2';
+
   const baseButton =
-    'bg-black text-white font-semibold rounded text-center w-full border-2 border-white px-4 py-2';
-  const panelClass = 'border rounded shadow-sm p-4 relative';
+    'bg-black text-white font-semibold rounded text-center w-full border border-white px-4 py-2';
+
+  const panelClass =
+    'border border-[#ddd] rounded shadow-sm p-4 relative';
 
   const isUrlReady = imageUrlInput.trim().length > 0;
 
@@ -134,7 +141,7 @@ export default function AltTextGenerator() {
 
       <div className="space-y-3">
         {/* URL */}
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr_128px] gap-3">
+        <div className="grid grid-cols-[1fr_128px] gap-3">
           <input
             type="text"
             value={imageUrlInput}
@@ -175,7 +182,7 @@ export default function AltTextGenerator() {
         {/* Image */}
         {imageSrc && (
           <div className={panelClass}>
-            <img src={imageSrc} className="max-h-[400px] mx-auto" />
+            <img src={imageSrc} alt="Preview" className="max-h-[400px] mx-auto" />
           </div>
         )}
 
@@ -184,14 +191,17 @@ export default function AltTextGenerator() {
           <div className={panelClass}>Generating alt...</div>
         ) : (
           altText && (
-            <div className={panelClass}>
-              {/* copy button */}
+            <div className={`${panelClass} pr-[69px]`}>
               <button
                 onClick={handleCopy}
-                className="absolute top-2 right-2 p-1 text-xl cursor-pointer"
+                className="absolute top-3 right-3 p-2 text-xl cursor-pointer"
+                aria-label="Copy alt text"
+                title={copied ? 'Copied' : 'Copy alt text'}
+                type="button"
               >
                 {copied ? '✓' : '⧉'}
               </button>
+
               <p>{altText}</p>
             </div>
           )
