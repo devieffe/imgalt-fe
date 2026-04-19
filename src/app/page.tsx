@@ -1,6 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg'];
+const ALLOWED_EXTENSIONS = /\.(jpg|jpeg|png)$/i;
 
 export default function AltTextGenerator() {
   const [hydrated, setHydrated] = useState(false);
@@ -12,9 +16,6 @@ export default function AltTextGenerator() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => setHydrated(true), []);
-
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-  const allowedExtensions = /\.(jpg|jpeg|png)$/i;
 
   const generateAltText = async (src: string) => {
     setAltText('');
@@ -34,7 +35,7 @@ export default function AltTextGenerator() {
       if (res.ok) setAltText(data.alt || 'No alt text generated.');
       else setError(data.error || 'Failed to generate alt text.');
     } catch {
-      setError('Something went wrong.');
+      setError('Something went wrong. Please try again.');
     }
 
     setLoading(false);
@@ -48,7 +49,7 @@ export default function AltTextGenerator() {
     setAltText('');
     setCopied(false);
 
-    if (!allowedTypes.includes(file.type)) {
+    if (!ALLOWED_TYPES.includes(file.type)) {
       setError('Only .jpg, .jpeg, and .png files are supported.');
       return;
     }
@@ -81,13 +82,13 @@ export default function AltTextGenerator() {
       return;
     }
 
-    if (!allowedExtensions.test(parsedUrl.pathname)) {
+    if (!ALLOWED_EXTENSIONS.test(parsedUrl.pathname)) {
       setError('Only image URLs ending in .jpg, .jpeg, or .png are allowed.');
       return;
     }
 
     try {
-      const img = new Image();
+      const img = new window.Image();
 
       const loadPromise = new Promise<void>((resolve, reject) => {
         img.onload = () => resolve();
@@ -100,7 +101,7 @@ export default function AltTextGenerator() {
       setImageSrc(urlString);
       generateAltText(urlString);
     } catch {
-      setError('The image URL doesn\'t exist or cannot be loaded.');
+      setError("The image URL doesn't exist or cannot be loaded.");
     }
   };
 
@@ -116,96 +117,123 @@ export default function AltTextGenerator() {
     try {
       await navigator.clipboard.writeText(altText);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1200);
+      setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError('Failed to copy alt text.');
+      setError('Failed to copy to clipboard.');
     }
   };
 
   if (!hydrated) return null;
 
-  const inputClass =
-    'w-full min-w-0 rounded border border-[#ddd] px-4 py-2';
-
-  const baseButton =
-    'bg-black text-white font-semibold rounded text-center w-full border border-white px-4 py-2';
-
-  const panelClass =
-    'border border-[#ddd] rounded shadow-sm p-4 relative';
-
   const isUrlReady = imageUrlInput.trim().length > 0;
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-3">Generate alt text</h1>
-
-      <div className="space-y-3">
-        {/* URL */}
-        <div className="grid grid-cols-[1fr_128px] gap-3">
-          <input
-            type="text"
-            value={imageUrlInput}
-            onChange={(e) => setImageUrlInput(e.target.value)}
-            placeholder="Paste image URL"
-            className={inputClass}
-            onKeyDown={(e) => e.key === 'Enter' && handleUrlSubmit()}
-          />
-
-          <button
-            onClick={handleUrlSubmit}
-            disabled={!isUrlReady}
-            className={`${baseButton} ${isUrlReady
-              ? 'cursor-pointer opacity-100'
-              : 'cursor-not-allowed opacity-80'
-              }`}
-          >
-            Add URL
-          </button>
+    <div className="wrapper">
+      <div className="card">
+        <div className="header">
+          <h1 className="title">Generate alt text</h1>
+          <p className="subtitle">Instantly get accessible alt text for web images using AI.</p>
         </div>
 
-        {/* Upload */}
-        <label className="block">
-          <input
-            type="file"
-            accept=".jpg,.jpeg,.png"
-            onChange={handleUpload}
-            className="hidden"
-          />
-          <div className={`${baseButton} cursor-pointer text-center`}>
-            Upload file
+        <div className="form">
+          {/* URL input row */}
+          <div className="urlRow">
+            <input
+              type="text"
+              value={imageUrlInput}
+              onChange={(e) => setImageUrlInput(e.target.value)}
+              placeholder="Paste image URL (.jpg, .jpeg, .png)"
+              onKeyDown={(e) => e.key === 'Enter' && handleUrlSubmit()}
+              className="input"
+            />
+            <button
+              onClick={handleUrlSubmit}
+              disabled={!isUrlReady}
+              className="btnPrimary"
+            >
+              Add URL
+            </button>
           </div>
-        </label>
 
-        {/* Error */}
-        {error && <div className={panelClass}>{error}</div>}
-
-        {/* Image */}
-        {imageSrc && (
-          <div className={panelClass}>
-            <img src={imageSrc} alt="Preview" className="max-h-[400px] mx-auto" />
+          {/* Divider */}
+          <div className="divider">
+            <div className="dividerLine" />
+            or
+            <div className="dividerLine" />
           </div>
-        )}
 
-        {/* Loading / Result */}
-        {loading ? (
-          <div className={panelClass}>Generating alt...</div>
-        ) : (
-          altText && (
-            <div className={`${panelClass} pr-[69px]`}>
-              <button
-                onClick={handleCopy}
-                className="absolute top-3 right-3 p-2 text-xl cursor-pointer"
-                aria-label="Copy alt text"
-                title={copied ? 'Copied' : 'Copy alt text'}
-                type="button"
-              >
-                {copied ? '✓' : '⧉'}
-              </button>
-
-              <p>{altText}</p>
+          {/* Upload button */}
+          <label className="uploadLabel">
+            <input type="file" accept=".jpg,.jpeg,.png" onChange={handleUpload} className="hidden" />
+            <div className="uploadBtn">
+              <span className="material-icons">upload_file</span>
+              Upload file
             </div>
-          )
-        )}
+          </label>
+
+          {/* Error alert */}
+          {error && (
+            <div role="alert" className="alert alertError">
+              <span className="material-icons alertErrorIcon">warning</span>
+              <span>{error}</span>
+              <button onClick={() => setError('')} className="alertErrorDismiss" aria-label="Dismiss error">
+                <span className="material-icons">close</span>
+              </button>
+            </div>
+          )}
+
+          {/* Image preview */}
+          {imageSrc && (
+            <div className="preview">
+              <Image
+                src={imageSrc}
+                alt="Preview"
+                unoptimized
+                width={0}
+                height={0}
+                sizes="100vw"
+                className="previewImg"
+              />
+            </div>
+          )}
+
+          {/* Loading */}
+          {loading && (
+            <div role="status" className="alert alertLoading">
+              <span className="spinner" />
+              Generating alt text…
+            </div>
+          )}
+
+          {/* Result */}
+          {!loading && altText && (
+            <div className="alert alertSuccess">
+              <div className="alertSuccessHeader">
+                <span className="material-icons">check_circle</span>
+                <span>Alt text generated</span>
+                <button
+                  onClick={handleCopy}
+                  title={copied ? 'Copied!' : 'Copy to clipboard'}
+                  aria-label="Copy alt text"
+                  className="copyBtn"
+                  data-copied={copied}
+                >
+                  <span className="material-icons">{copied ? 'check' : 'content_copy'}</span>
+                  {copied ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+              <p className="altText">{altText}</p>
+            </div>
+          )}
+
+          {/* Copy toast */}
+          {copied && (
+            <div role="status" className="toast">
+              <span className="material-icons">check</span>
+              Copied to clipboard
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
