@@ -4,26 +4,28 @@ A **Next.js** app that generates descriptive `alt` text for images — improving
 
 Upload an image or paste a URL and get an accurate alt text description in seconds, either via the OpenAI API or entirely in-browser using a local AI model.
 
-## Features
+## ✨ Features
 
-- Upload `.jpg`, `.jpeg`, or `.png` images
-- Paste an image **URL** to generate alt text without uploading
-- Two generation methods:
+- 📁 Upload `.jpg`, `.jpeg`, `.png`, or `.webp` images
+- 🔗 Paste an image **URL** to generate alt text without uploading
+- ⚡ Auto-generates on upload or URL submit — no button needed
+- 🤖 Two generation methods:
   - **API mode** — uses OpenAI GPT-4o (requires API key)
   - **Local mode** — runs fully in the browser via [Transformers.js](https://huggingface.co/docs/transformers.js); no API key needed; model is downloaded once (~150 MB) and cached
-- Model cache detection — skips confirmation and download spinner on repeat visits
-- Server-side rate limiting (10 API calls per hour)
-- One-click copy to clipboard
-- Responsive design, dark mode support
+- 🎨 Output style selector — Normal, Casual, Detailed, or Creative (API mode)
+- 🧠 Model cache detection — skips confirmation and download spinner on repeat visits
+- 🔒 Server-side rate limiting (10 API calls per hour)
+- 📋 One-click copy to clipboard
+- 🌙 Responsive design with dark mode support
 
-## How it works
+## 🔄 How it works
 
-1. Pick a generation method from the dropdown
+1. Pick a generation method from the Advanced panel
 2. Upload an image or paste an image URL
-3. The image is validated and sent for processing
-4. A concise, accurate alt text is returned and displayed
+3. Alt text is generated automatically
+4. Copy the result with one click
 
-## Tech stack
+## 🛠 Tech stack
 
 | Technology                | Purpose                                           |
 |---------------------------|---------------------------------------------------|
@@ -33,7 +35,7 @@ Upload an image or paste a URL and get an accurate alt text description in secon
 | **TypeScript**            | Type safety across app and API routes             |
 | **Tailwind CSS**          | Utility-first styling                             |
 
-## Environment
+## 🔑 Environment
 
 Create a `.env.local` file for API mode:
 
@@ -43,8 +45,7 @@ OPENAI_API_KEY=your_key_here
 
 Local mode works without any environment variables.
 
-
-## Live demo
+## 🌐 Live demo
 
 [imgalt-fe.vercel.app](https://imgalt-fe.vercel.app/)
-  
+

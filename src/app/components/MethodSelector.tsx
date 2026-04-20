@@ -44,7 +44,7 @@ export default function MethodSelector({ method, localStatus, modelReady, modelC
                     onChange={(e) => handleChange(e.target.value as Method)}
                 >
                     <option value="api">API: OpenAI GPT</option>
-                    <option value="local">Local: Transformers.js (no API key, download required)</option>
+                    <option value="local">Local: Transformers.js (less stable, not recommended)</option>
                 </select>
             </div>
 

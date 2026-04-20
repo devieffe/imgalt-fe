@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { NextResponse } from 'next/server';
+import { API_PROMPTS } from '../lib/styleRules';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -33,8 +34,11 @@ export async function POST(req: Request) {
     );
   }
 
+  const STYLE_PROMPTS: Record<string, string> = API_PROMPTS;
+
   try {
-    const { imageBase64 } = await req.json();
+    const { imageBase64, outputStyle } = await req.json();
+    const prompt = STYLE_PROMPTS[outputStyle as string] ?? STYLE_PROMPTS.normal;
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -44,7 +48,7 @@ export async function POST(req: Request) {
           content: [
             {
               type: 'text',
-              text: 'Describe this image for an alt attribute in HTML, in plain text, be concise and specific.',
+              text: prompt,
             },
             {
               type: 'image_url',
@@ -55,7 +59,7 @@ export async function POST(req: Request) {
           ],
         },
       ],
-      max_tokens: 100,
+      max_tokens: 150,
     });
 
     const altText = response.choices[0]?.message?.content ?? 'No description generated.';

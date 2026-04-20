@@ -2,9 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react';
 import type { ImageToTextPipeline } from '@huggingface/transformers';
+import type { OutputStyle } from '../lib/styleRules';
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg'];
-const ALLOWED_EXTENSIONS = /\.(jpg|jpeg|png)$/i;
+export type { OutputStyle };
+
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+const ALLOWED_EXTENSIONS = /\.(jpg|jpeg|png|webp)$/i;
 
 export type Method = 'api' | 'local';
 
@@ -13,9 +16,11 @@ export function useAltText() {
     const [imageUrlInput, setImageUrlInput] = useState('');
     const [altText, setAltText] = useState('');
     const [error, setError] = useState('');
+    const [urlError, setUrlError] = useState('');
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
     const [method, setMethod] = useState<Method>('api');
+    const [outputStyle, setOutputStyle] = useState<OutputStyle>('normal');
     const [localStatus, setLocalStatus] = useState('');
     const [modelReady, setModelReady] = useState(false);
     const [modelCached, setModelCached] = useState(false);
@@ -58,6 +63,7 @@ export function useAltText() {
     };
 
     const generateAltText = async (src: string) => {
+        if (!src) return;
         setAltText('');
         setError('');
         setCopied(false);
@@ -72,15 +78,15 @@ export function useAltText() {
                 }
                 const pipe = await getLocalPipeline();
                 const result = await pipe(src);
-                const text = Array.isArray(result)
+                const raw = Array.isArray(result)
                     ? (result[0] as { generated_text: string }).generated_text
                     : '';
-                setAltText(text || 'No alt text generated.');
+                setAltText(raw.trim() || 'No alt text generated.');
             } else {
                 const res = await fetch('/api/imgalt', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ imageBase64: src }),
+                    body: JSON.stringify({ imageBase64: src, outputStyle }),
                 });
                 const data = await res.json();
                 if (res.ok) setAltText(data.alt || 'No alt text generated.');
@@ -95,10 +101,13 @@ export function useAltText() {
         setLoading(false);
     };
 
+    const handleGenerate = () => generateAltText(imageSrc);
+
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         setError('');
+        setUrlError('');
         setAltText('');
         setCopied(false);
 
@@ -121,6 +130,7 @@ export function useAltText() {
         if (!trimmed) return;
 
         setError('');
+        setUrlError('');
         setAltText('');
         setCopied(false);
 
@@ -128,17 +138,17 @@ export function useAltText() {
         try {
             parsedUrl = new URL(trimmed);
         } catch {
-            setError('Enter a valid image URL.');
+            setUrlError('Enter a valid image URL.');
             return;
         }
 
         if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-            setError('Only http and https image URLs are allowed.');
+            setUrlError('Only http and https image URLs are allowed.');
             return;
         }
 
         if (!ALLOWED_EXTENSIONS.test(parsedUrl.pathname)) {
-            setError('Only image URLs ending in .jpg, .jpeg, or .png are allowed.');
+            setUrlError('Only image URLs ending in .jpg, .jpeg, .png, or .webp are allowed.');
             return;
         }
 
@@ -152,7 +162,7 @@ export function useAltText() {
             setImageSrc(trimmed);
             generateAltText(trimmed);
         } catch {
-            setError("The image URL doesn't exist or cannot be loaded.");
+            setUrlError("The image URL doesn't exist or cannot be loaded.");
         }
     };
 
@@ -171,6 +181,7 @@ export function useAltText() {
         setMethod(m);
         setAltText('');
         setError('');
+        setUrlError('');
         setLocalStatus('');
     };
 
@@ -179,9 +190,11 @@ export function useAltText() {
         imageUrlInput, setImageUrlInput,
         altText,
         error, setError,
+        urlError, setUrlError,
         loading,
         copied,
         method, changeMethod,
+        outputStyle, setOutputStyle,
         localStatus, modelReady, modelCached,
         handleUpload,
         handleUrlSubmit,
