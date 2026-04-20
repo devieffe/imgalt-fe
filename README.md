@@ -1,31 +1,47 @@
 # imgalt-fe
 
-Another **Next.js** app, it allows users to upload images or provide image URLs and receive **generated img alt text descriptions** 
-using OpenAI's image model. It's perfect for improving accessibility and better search optimization practices in image-heavy websites.
+A **Next.js** app that generates descriptive `alt` text for images — improving web accessibility and SEO for image-heavy sites.
+
+Upload an image or paste a URL and get an accurate alt text description in seconds, either via the OpenAI API or entirely in-browser using a local AI model.
 
 ## Features
 
 - Upload `.jpg`, `.jpeg`, or `.png` images
-- Add image by **URL**
-- Generate descriptive **alt text** automatically via OpenAI API 4o
-- Preview image and description
-- Support for **Edge Functions** and modern **Next.js App Router**
+- Paste an image **URL** to generate alt text without uploading
+- Two generation methods:
+  - **API mode** — uses OpenAI GPT-4o (requires API key)
+  - **Local mode** — runs fully in the browser via [Transformers.js](https://huggingface.co/docs/transformers.js); no API key needed; model is downloaded once (~150 MB) and cached
+- Model cache detection — skips confirmation and download spinner on repeat visits
+- Server-side rate limiting (10 API calls per hour)
+- One-click copy to clipboard
+- Responsive design, dark mode support
 
 ## How it works
 
-1. User uploads an image or pastes an image URL
-2. Image is validated and converted to base64 (for uploads)
-3. Sent to OpenAI API for image understanding
-4. A meaningful, accurate alt description is returned and displayed
+1. Pick a generation method from the dropdown
+2. Upload an image or paste an image URL
+3. The image is validated and sent for processing
+4. A concise, accurate alt text is returned and displayed
 
 ## Tech stack
 
-| Technology     | Purpose                                |
-|----------------|----------------------------------------|
-| **Next.js 15** | Full-stack React framework             |
-| **OpenAI API** | Generates summaries from scraped links |
-| **TypeScript** | Type safety across app and backend     |
-| **SCSS**       | Custom style UI                        |
+| Technology                | Purpose                                           |
+|---------------------------|---------------------------------------------------|
+| **Next.js 16**            | Full-stack React framework (App Router)           |
+| **OpenAI GPT-4o**         | Cloud-based image-to-text (API mode)              |
+| **Transformers.js**       | In-browser ML inference (local mode, no API key)  |
+| **TypeScript**            | Type safety across app and API routes             |
+| **Tailwind CSS**          | Utility-first styling                             |
+
+## Environment
+
+Create a `.env.local` file for API mode:
+
+```env
+OPENAI_API_KEY=your_key_here
+```
+
+Local mode works without any environment variables.
 
 
 ## Live demo
