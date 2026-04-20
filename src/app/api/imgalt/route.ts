@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { NextResponse } from 'next/server';
-import { API_PROMPTS } from '../lib/styleRules';
+import { API_PROMPTS } from '../../lib/styleRules';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
