@@ -3,7 +3,10 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: "Generate alt text for images",
-  description: "",
+  description: "Generate accessible alt text for images.",
+  applicationName: "ImgAlt",
+  referrer: "strict-origin-when-cross-origin",
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({
@@ -13,10 +16,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-      </head>
       <body>
+        <a className="skipLink" href="#main-content">Skip to main content</a>
         {children}
       </body>
     </html>

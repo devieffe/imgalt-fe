@@ -11,26 +11,32 @@ interface Props {
 
 export default function MethodSelector({ method, localStatus, modelReady, modelCached, onChange }: Props) {
     const [confirming, setConfirming] = useState(false);
+    const [confirmVisible, setConfirmVisible] = useState(false);
     const [pending, setPending] = useState<Method | null>(null);
 
     const handleChange = (next: Method) => {
         if (next === 'local' && method !== 'local' && !modelCached && !modelReady) {
             setPending(next);
             setConfirming(true);
+            setConfirmVisible(true);
         } else {
+            setConfirming(false);
+            setPending(null);
+            if (confirmVisible) setConfirmVisible(false);
             onChange(next);
         }
     };
 
     const handleConfirm = () => {
         setConfirming(false);
-        if (pending) onChange(pending);
         setPending(null);
+        if (pending) onChange(pending);
     };
 
     const handleCancel = () => {
         setConfirming(false);
         setPending(null);
+        setConfirmVisible(false);
     };
 
     return (
@@ -39,6 +45,7 @@ export default function MethodSelector({ method, localStatus, modelReady, modelC
                 <label className="methodLabel" htmlFor="method-select">Method</label>
                 <select
                     id="method-select"
+                    aria-label="Generation method"
                     className="methodSelect"
                     value={pending ?? method}
                     onChange={(e) => handleChange(e.target.value as Method)}
@@ -48,30 +55,44 @@ export default function MethodSelector({ method, localStatus, modelReady, modelC
                 </select>
             </div>
 
-            {confirming && (
-                <div className="confirmBox" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
-                    <p id="confirm-title" className="confirmText">
-                        Local mode runs entirely in your browser. First use downloads the model (~150 MB); subsequent runs are instant. Continue?
-                    </p>
-                    <div className="confirmActions">
-                        <button
-                            className="confirmOk"
-                            onClick={handleConfirm}
-                        >OK</button>
-                        <button
-                            className="confirmCancel"
-                            onClick={handleCancel}
-                        >Cancel</button>
+            <div
+                className={`confirmPanel advancedBody${confirmVisible ? ' advancedBodyOpen' : ''}`}
+                aria-hidden={!confirmVisible}
+                inert={!confirmVisible}
+                onTransitionEnd={(event) => {
+                    if (event.target === event.currentTarget && !confirming) setConfirmVisible(false);
+                }}
+            >
+                <div className="advancedInner">
+                    <div className="confirmBox" role="alertdialog" aria-labelledby="confirm-title" aria-describedby="confirm-description">
+                        <p id="confirm-title" className="confirmTitle">Use local image model?</p>
+                        <p id="confirm-description" className="confirmText">
+                            Local mode runs entirely in your browser. First use downloads the model (~150 MB); subsequent runs are instant. Continue?
+                        </p>
+                        <div className="confirmActions">
+                            <button
+                                className="confirmOk"
+                                type="button"
+                                onClick={handleConfirm}
+                            >Continue</button>
+                            <button className="confirmCancel" type="button" onClick={handleCancel}>Cancel</button>
+                        </div>
                     </div>
                 </div>
-            )}
+            </div>
 
-            {localStatus && !modelReady && (
-                <div role="status" className="alert alertLoading">
-                    <span className="spinner" />
-                    {localStatus}
+            <div
+                className={`localStatusReveal${localStatus && !modelReady ? ' localStatusRevealOpen' : ''}`}
+                aria-hidden={!localStatus || modelReady}
+                inert={!localStatus || modelReady}
+            >
+                <div className="localStatusRevealInner">
+                    <div role="status" className="alert alertLoading">
+                        <span className="spinner" aria-hidden="true" />
+                        {localStatus}
+                    </div>
                 </div>
-            )}
+            </div>
         </>
     );
 }

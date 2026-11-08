@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import Icon from './Icon';
 
 interface Props {
     urlOpen: boolean;
@@ -22,12 +23,16 @@ export default function ImageInput({ urlOpen, urlError, value, onChange, onSubmi
 
     return (
         <div className="uploadAction">
-            <div className={`urlSlide${urlOpen ? ' urlSlideOpen' : ''}`}>
-                <div className="urlSlideInner">
+            <div id="image-url-form" className={`urlSlide${urlOpen ? ' urlSlideOpen' : ''}`} aria-hidden={!urlOpen}>
+                <div className="urlSlideInner" inert={!urlOpen}>
                     <div className="urlRow">
                         <input
                             ref={urlInputRef}
-                            type="text"
+                            type="url"
+                            inputMode="url"
+                            aria-label="Image URL"
+                            aria-invalid={Boolean(urlError)}
+                            aria-describedby={urlError ? 'image-url-error' : undefined}
                             value={value}
                             onChange={(e) => {
                                 onChange(e.target.value);
@@ -37,24 +42,27 @@ export default function ImageInput({ urlOpen, urlError, value, onChange, onSubmi
                             onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
                             className="input"
                         />
-                        <div className="inputFade" aria-hidden="true" />
-                        <button
-                            onClick={onSubmit}
-                            disabled={!isReady}
-                            className={`btnPrimary${urlError ? '' : isReady ? ' btnPrimaryReady' : ''}`}
-                        >
-                            Submit
-                        </button>
+                        <div className="submitGroup">
+                            <div className="inputFade" aria-hidden="true" />
+                            <button
+                                onClick={onSubmit}
+                                disabled={!isReady}
+                                className={`btnPrimary${urlError ? '' : isReady ? ' btnPrimaryReady' : ''}`}
+                            >
+                                Submit
+                            </button>
+                        </div>
                     </div>
+                    {urlError && <p id="image-url-error" className="fieldError">{urlError}</p>}
                 </div>
             </div>
 
             <label className="uploadLabel">
-                <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={onUpload} className="hidden" />
-                <div className="uploadBtn">
-                    <span className="material-icons">upload_file</span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onUpload} className="hidden" aria-label="Upload image" />
+                <span className="uploadBtn">
+                    <Icon name="upload" />
                     Upload image
-                </div>
+                </span>
             </label>
         </div>
     );

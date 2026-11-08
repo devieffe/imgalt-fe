@@ -6,6 +6,7 @@ import AdvancedSection from './components/AdvancedSection';
 import ImageInput from './components/ImageInput';
 import ImagePreview from './components/ImagePreview';
 import ResultBox from './components/ResultBox';
+import Icon from './components/Icon';
 
 export default function AltTextGenerator() {
   const [hydrated, setHydrated] = useState(false);
@@ -34,7 +35,7 @@ export default function AltTextGenerator() {
 
   return (
     <div className="wrapper">
-      <div className="card">
+      <main className="card" id="main-content">
         <div className="header">
           <h1 className="title">Generate alt text</h1>
           <p className="subtitle">Instantly get accessible alt text for web images using AI.</p>
@@ -43,10 +44,10 @@ export default function AltTextGenerator() {
         <div className="form">
           {error && (
             <div role="alert" className="alert alertError">
-              <span className="material-icons alertErrorIcon">warning</span>
+              <Icon name="warning" className="alertErrorIcon" />
               <span>{error}</span>
               <button onClick={() => setError('')} className="alertErrorDismiss" aria-label="Dismiss error">
-                <span className="material-icons">close</span>
+                <Icon name="close" />
               </button>
             </div>
           )}
@@ -55,7 +56,7 @@ export default function AltTextGenerator() {
 
           <ResultBox loading={loading} altText={altText} copied={copied} onCopy={handleCopy} />
 
-          <div className="uploadGroup">
+          <section className="uploadGroup" aria-label="Image input and settings">
             <ImageInput
               urlOpen={urlOpen}
               urlError={urlError}
@@ -66,17 +67,22 @@ export default function AltTextGenerator() {
             />
 
             <div className="controlsRow">
-              <button className="controlLink" onClick={() => setUrlOpen(o => !o)}>
-                <span className="material-icons controlLinkIcon">{urlOpen ? 'remove' : 'add'}</span>
-                Add URL
+              <button className="controlLink" type="button" aria-expanded={advancedOpen} aria-controls="advanced-settings" onClick={() => setAdvancedOpen(o => !o)}>
+                <span className="controlLinkContent">
+                  Advanced
+                  <Icon name={advancedOpen ? 'chevronUp' : 'chevronDown'} className="controlLinkIcon" />
+                </span>
               </button>
-              <button className="controlLink" onClick={() => setAdvancedOpen(o => !o)}>
-                Advanced
-                <span className="material-icons controlLinkIcon">{advancedOpen ? 'expand_less' : 'expand_more'}</span>
+              <button className="controlLink" type="button" aria-expanded={urlOpen} aria-controls="image-url-form" onClick={() => setUrlOpen(o => !o)}>
+                <span className="controlLinkContent">
+                  <Icon name={urlOpen ? 'minus' : 'plus'} className="controlLinkIcon" />
+                  Add URL
+                </span>
               </button>
             </div>
-          </div>
+          </section>
 
+          <div id="advanced-settings">
           <AdvancedSection
             open={advancedOpen}
             method={method}
@@ -87,8 +93,9 @@ export default function AltTextGenerator() {
             onMethodChange={changeMethod}
             onStyleChange={setOutputStyle}
           />
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

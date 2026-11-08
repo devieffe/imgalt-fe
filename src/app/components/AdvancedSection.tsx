@@ -26,8 +26,8 @@ export default function AdvancedSection({
 }: Props) {
     return (
         <div className="advanced">
-            <div className={`advancedBody${open ? ' advancedBodyOpen' : ''}`}>
-                <div className="advancedInner">
+            <div className={`advancedBody${open ? ' advancedBodyOpen' : ''}`} aria-hidden={!open}>
+                <div className="advancedInner" inert={!open}>
                     <div className="advancedContent">
                         <MethodSelector
                             method={method}

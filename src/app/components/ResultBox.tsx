@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import Icon from './Icon';
 
 interface Props {
     loading: boolean;
@@ -41,9 +42,9 @@ export default function ResultBox({ loading, altText, copied, onCopy }: Props) {
     return (
         <div className="resultBox">
             {(loading || fadingOut) && (
-                <div className={`resultLoading${fadingOut ? ' resultLoadingFade' : ''}`}>
-                    <span className="spinnerGreen" role="status" aria-label="Generating" />
-                    Generating alt text…
+                <div className={`resultLoading${fadingOut ? ' resultLoadingFade' : ''}`} role="status" aria-live="polite">
+                    <span className="spinnerGreen" aria-hidden="true" />
+                    <span>Generating alt text…</span>
                 </div>
             )}
             {!loading && !fadingOut && altText && (
@@ -54,9 +55,9 @@ export default function ResultBox({ loading, altText, copied, onCopy }: Props) {
                         aria-label="Copy alt text"
                         className="copyBtn"
                     >
-                        <span className="material-icons">{copied ? 'check_box' : 'content_copy'}</span>
+                        <Icon name={copied ? 'copied' : 'copy'} />
                     </button>
-                    <p className="altText">{displayed}</p>
+                    <p className="altText" aria-live="polite">{displayed}</p>
                 </>
             )}
         </div>

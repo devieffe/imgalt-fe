@@ -10,7 +10,7 @@ export default function ImagePreview({ src }: Props) {
         <div className="preview">
             <Image
                 src={src}
-                alt="Preview"
+                alt="Preview of the selected image"
                 unoptimized
                 width={0}
                 height={0}
