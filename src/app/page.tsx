@@ -85,7 +85,9 @@ export default function AltTextGenerator() {
             modelCached={modelCached}
             outputStyle={outputStyle}
             onMethodChange={changeMethod}
-            onStyleChange={setOutputStyle}
+            onStyleChange={(style) => {
+              if (advancedOpen) setOutputStyle(style);
+            }}
           />
         </div>
       </div>

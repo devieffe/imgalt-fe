@@ -21,15 +21,7 @@ export default function ImageInput({ urlOpen, urlError, value, onChange, onSubmi
     }, [urlError]);
 
     return (
-        <>
-            <label className="uploadLabel">
-                <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={onUpload} className="hidden" />
-                <div className="uploadBtn">
-                    <span className="material-icons">upload_file</span>
-                    Upload image
-                </div>
-            </label>
-
+        <div className="uploadAction">
             <div className={`urlSlide${urlOpen ? ' urlSlideOpen' : ''}`}>
                 <div className="urlSlideInner">
                     <div className="urlRow">
@@ -45,12 +37,25 @@ export default function ImageInput({ urlOpen, urlError, value, onChange, onSubmi
                             onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
                             className="input"
                         />
-                        <button onClick={onSubmit} disabled={!isReady} className="btnPrimary">
-                            Go
+                        <div className="inputFade" aria-hidden="true" />
+                        <button
+                            onClick={onSubmit}
+                            disabled={!isReady}
+                            className={`btnPrimary${urlError ? '' : isReady ? ' btnPrimaryReady' : ''}`}
+                        >
+                            Submit
                         </button>
                     </div>
                 </div>
             </div>
-        </>
+
+            <label className="uploadLabel">
+                <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={onUpload} className="hidden" />
+                <div className="uploadBtn">
+                    <span className="material-icons">upload_file</span>
+                    Upload image
+                </div>
+            </label>
+        </div>
     );
 }

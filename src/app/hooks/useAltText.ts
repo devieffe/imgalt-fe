@@ -185,6 +185,14 @@ export function useAltText() {
         setLocalStatus('');
     };
 
+    const changeOutputStyle = (style: OutputStyle) => {
+        if (style === outputStyle) return;
+        setOutputStyle(style);
+        if (imageSrc) {
+            void generateAltText(imageSrc);
+        }
+    };
+
     return {
         imageSrc,
         imageUrlInput, setImageUrlInput,
@@ -194,7 +202,7 @@ export function useAltText() {
         loading,
         copied,
         method, changeMethod,
-        outputStyle, setOutputStyle,
+        outputStyle, setOutputStyle: changeOutputStyle,
         localStatus, modelReady, modelCached,
         handleUpload,
         handleUrlSubmit,
