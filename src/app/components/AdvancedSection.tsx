@@ -15,6 +15,7 @@ interface Props {
 
 const STYLES: { value: OutputStyle; label: string; desc: string }[] = [
     { value: 'normal', label: 'Normal', desc: 'Concise and accurate' },
+    { value: 'short', label: 'Short', desc: '3–6 words' },
     { value: 'casual', label: 'Casual', desc: 'Friendly, conversational' },
     { value: 'detailed', label: 'Detailed', desc: 'Colors, context, composition' },
     { value: 'creative', label: 'Creative', desc: 'Vivid, mood-driven' },
@@ -36,16 +37,15 @@ export default function AdvancedSection({
                             onChange={onMethodChange}
                         />
 
-                        <div className={`styleRow${method === 'local' ? ' styleRowDisabled' : ''}`}>
+                        <div className="styleRow">
                             <span className="methodLabel">Output style</span>
                             <div className="stylePills">
                                 {STYLES.map(s => (
                                     <button
                                         key={s.value}
-                                        className={`stylePill${outputStyle === s.value && method !== 'local' ? ' stylePillActive' : ''}${method === 'local' ? ' stylePillDisabled' : ''}`}
-                                        onClick={() => method !== 'local' && onStyleChange(s.value)}
-                                        disabled={method === 'local'}
-                                        title={method === 'local' ? 'Not available in local mode' : s.desc}
+                                        className={`stylePill${outputStyle === s.value ? ' stylePillActive' : ''}`}
+                                        onClick={() => onStyleChange(s.value)}
+                                        title={s.desc}
                                     >
                                         {s.label}
                                     </button>

@@ -1,9 +1,11 @@
-export type OutputStyle = 'normal' | 'casual' | 'detailed' | 'creative';
+export type OutputStyle = 'normal' | 'short' | 'casual' | 'detailed' | 'creative';
 
 // Prompts sent to GPT-4o (API method)
 export const API_PROMPTS: Record<OutputStyle, string> = {
     normal:
         'Describe this image for an HTML alt attribute. Be factual, concise (one sentence), and specific. No introductory phrases.',
+    short:
+        'Describe this image for an HTML alt attribute in 3 to 6 words. Be factual and specific. No introductory phrases.',
     casual:
         'Write a short, casual and friendly alt text for this image in one sentence, as if telling a friend what you see.',
     detailed:
@@ -36,6 +38,14 @@ export const LOCAL_RULES: Record<OutputStyle, StyleRule> = {
         capitalise: true,
         suffix: null,
         maxLength: 120,
+    },
+    short: {
+        normalise: true,
+        ensurePeriod: false,
+        stripPreamble: true,
+        capitalise: true,
+        suffix: null,
+        maxLength: 40,
     },
     casual: {
         normalise: true,
