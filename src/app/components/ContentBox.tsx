@@ -20,7 +20,7 @@ export default function ContentBox({ children, kind, id, inline, loading, copied
             {loading ? <span className="spinnerGreen" /> : <Icon name={kind === 'alert' ? 'close' : 'copied'} />}
         </span>
     );
-    const text = <span className="contentBoxText" role={loading ? 'status' : undefined} aria-live={kind === 'result' ? 'polite' : undefined}>{children}</span>;
+    const text = <span className="contentBoxText" role={loading ? 'status' : undefined} aria-live={kind === 'result' ? 'polite' : undefined} aria-label={loading ? 'Generating alt text...' : undefined}>{children}</span>;
 
     if (kind === 'result') {
         return (

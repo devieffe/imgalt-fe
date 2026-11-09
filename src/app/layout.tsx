@@ -3,7 +3,7 @@ import { API_MODEL, LOCAL_MODELS } from './lib/modelInfo';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'ImgAlt — image alt text generator',
+  title: 'ImgAlt',
   description: 'Create accessible image descriptions from uploaded files or image URLs with an OpenAI API model or local browser models. Choose normal, short, detailed, or creative alt text.',
   applicationName: "ImgAlt",
   keywords: ['alt text', 'image descriptions', 'image accessibility', 'AI alt text'],

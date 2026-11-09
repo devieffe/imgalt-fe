@@ -209,7 +209,7 @@ export default function MethodSelector({ open, method, localStatus, modelReady, 
                     <div className="confirmBox" role="alertdialog" aria-labelledby="confirm-title" aria-describedby="confirm-description">
                         <p id="confirm-title" className="confirmTitle">Use local image model?</p>
                         <p id="confirm-description" className="confirmText">
-                            Download <strong>{LOCAL_MODELS.caption.label} &amp; {LOCAL_MODELS.rephrase.label}</strong> from HuggingFace.co to browser cache ~{LOCAL_DOWNLOAD_ESTIMATE_MB} MB for local image descriptions and rephrasing. Results may be less consistent than API models. Do you wish to continue?
+                            Download <strong>{LOCAL_MODELS.caption.label} &amp; {LOCAL_MODELS.rephrase.label}</strong> from Hugging Face to browser cache ~{LOCAL_DOWNLOAD_ESTIMATE_MB} MB for local image descriptions and rephrasing. Results may be less consistent than API models. Do you wish to continue?
                         </p>
                         <div className="confirmActions">
                             <button
@@ -220,9 +220,9 @@ export default function MethodSelector({ open, method, localStatus, modelReady, 
                                 style={{ '--download-progress': `${modelReady ? 100 : Math.max(0, Math.min(100, downloadProgress ?? 0))}%` } as CSSProperties}
                             >
                                 <span aria-live="polite">{modelReady
-                                    ? 'Downloaded'
+                                    ? 'Downloaded.'
                                     : localStatus === 'downloading'
-                                        ? `Downloading ${formatMegabytes(downloadedBytes) ?? '0 MB'} / ~${formatMegabytes(downloadTotalBytes) ?? `${LOCAL_DOWNLOAD_ESTIMATE_MB} MB`}`
+                                        ? <>Downloading <span className="font-mono font-normal">{formatMegabytes(downloadedBytes) ?? '0'}/{downloadTotalBytes === null ? `~${LOCAL_DOWNLOAD_ESTIMATE_MB} MB` : `${formatMegabytes(downloadTotalBytes)} MB`}</span></>
                                         : localStatus === 'Loading model into memory…' ? 'Loading model…' : 'Continue'}</span>
                             </button>
                             <button className="confirmCancel" type="button" onClick={handleCancel}>Cancel</button>
@@ -237,5 +237,5 @@ export default function MethodSelector({ open, method, localStatus, modelReady, 
 
 function formatMegabytes(bytes: number | null) {
     if (bytes === null || bytes <= 0) return null;
-    return `${(bytes / 1_000_000).toFixed(1)} MB`;
+    return (bytes / 1_000_000).toFixed(1);
 }

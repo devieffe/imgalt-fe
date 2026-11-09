@@ -11,6 +11,8 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
 const ALLOWED_EXTENSIONS = /\.(jpg|jpeg|png|webp)$/i;
 const MAX_FILE_SIZE = 6 * 1024 * 1024;
 const MAX_IMAGE_PIXELS = 40_000_000;
+const MIN_GENERATION_DISPLAY_MS = 1_920; // 420ms fade/collapse plus 1.5s with the wheel visible.
+const LOCAL_INFERENCE_TIMEOUT_MS = 60_000;
 
 export type Method = 'api' | 'local';
 
@@ -111,6 +113,7 @@ export function useAltText() {
         const loadId = ++localLoadIdRef.current;
         const controller = new AbortController();
         localDownloadAbortRef.current = controller;
+        setModelWorking(null);
         setLocalStatus('Loading model into memory…');
         const pipelinePromise = (async () => {
             try {
@@ -199,14 +202,15 @@ export function useAltText() {
         src: string,
         selectedMethod: Method = methodRef.current,
         selectedStyle: OutputStyle = outputStyleRef.current,
+        minimumLoadingMs = MIN_GENERATION_DISPLAY_MS,
     ) => {
         if (!src) return;
+        const startedAt = Date.now();
         const generationId = ++generationIdRef.current;
         setAltText('');
         setError('');
         setCopied(false);
-
-        setLoading(false);
+        setLoading(true);
 
         const isCurrent = () => generationId === generationIdRef.current
             && src === imageSrcRef.current
@@ -214,6 +218,7 @@ export function useAltText() {
             && !errorRef.current && !urlErrorRef.current;
 
         let requestTimeout: number | undefined;
+        let inferenceTimeout: number | undefined;
         try {
             let generatedText = '';
             if (selectedMethod === 'local') {
@@ -226,7 +231,28 @@ export function useAltText() {
                     const pipe = await getLocalPipeline();
                     if (!isCurrent()) return;
                     setLoading(true);
-                    const result = await pipe(src);
+                    const inference = pipe(src);
+                    const result = await Promise.race([
+                        inference,
+                        new Promise<never>((_, reject) => {
+                            inferenceTimeout = window.setTimeout(
+                                () => reject(new DOMException('Local model inference timed out.', 'TimeoutError')),
+                                LOCAL_INFERENCE_TIMEOUT_MS,
+                            );
+                        }),
+                    ]).catch(async err => {
+                        if (err instanceof DOMException && err.name === 'TimeoutError') {
+                            await pipe.dispose().catch(() => undefined);
+                            if (pipelineRef.current === pipe) {
+                                pipelineRef.current = null;
+                                setModelReady(false);
+                                setModelWorking(false);
+                            }
+                        }
+                        throw err;
+                    }).finally(() => {
+                        if (inferenceTimeout !== undefined) window.clearTimeout(inferenceTimeout);
+                    });
                     if (generationId !== generationIdRef.current) return;
                     const caption = Array.isArray(result) ? result[0] as { generated_text?: unknown } | undefined : undefined;
                     raw = typeof caption?.generated_text === 'string' ? caption.generated_text.trim() : '';
@@ -276,10 +302,14 @@ export function useAltText() {
                 setError('No alt text generated.');
                 return;
             }
+            const remainingLoadingMs = minimumLoadingMs - (Date.now() - startedAt);
+            if (remainingLoadingMs > 0) await new Promise(resolve => window.setTimeout(resolve, remainingLoadingMs));
+            if (generationId !== generationIdRef.current) return;
             if (selectedMethod === 'local') setModelWorking(true);
             setAltText(generatedText);
         } catch (err) {
             if (requestTimeout !== undefined) window.clearTimeout(requestTimeout);
+            if (inferenceTimeout !== undefined) window.clearTimeout(inferenceTimeout);
             if (!isCurrent()) return;
             setLocalStatus('');
             if (selectedMethod === 'local') setModelWorking(false);
@@ -520,10 +550,11 @@ export function useAltText() {
                 void generateAltText(imageSrcRef.current, m);
             } else if (!imageSrcRef.current && m === 'local' && !pipelineRef.current) {
                 const load = getLocalPipeline();
-                void load.catch(() => {
+                void load.catch((err) => {
                     if (changeId !== generationIdRef.current || methodRef.current !== m) return;
                     setLocalStatus('');
-                    setError('The local image model could not be loaded. Please try again.');
+                    const reason = err instanceof Error && err.message ? `: ${err.message}` : '';
+                    setError(`The local image model could not be loaded${reason}.`);
                 });
             }
         }, 0));
@@ -625,7 +656,7 @@ export function useAltText() {
         outputStyleRef.current = style;
         flushSync(() => setOutputStyle(style));
         if (imageSrc && imageLoadReadyRef.current && !localConfirmationPendingRef.current) {
-            void generateAltText(imageSrc, methodRef.current, style);
+            void generateAltText(imageSrc, methodRef.current, style, MIN_GENERATION_DISPLAY_MS);
         }
     };
 

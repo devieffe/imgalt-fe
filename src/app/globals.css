@@ -532,6 +532,8 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-top: -13px;
+  padding-left: 23px;
+  padding-right: 22px;
 }
 
 .controlLink {
@@ -629,7 +631,7 @@ body {
 .contentBox {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 32px;
-  align-items: start;
+  align-items: center;
   gap: 12px;
   box-sizing: border-box;
   width: 100%;
@@ -661,20 +663,24 @@ body {
 }
 
 .contentBoxLoading {
-  grid-template-columns: 30px minmax(0, 1fr);
+  grid-template-columns: 17px minmax(0, 1fr);
 }
 
 .contentBox.contentBoxLoading {
-  gap: 0;
+  column-gap: 0.4em;
 }
 
 .contentBoxAction svg {
   transform: translate(8px, -1px);
 }
 
+.contentBoxResult .contentBoxAction svg {
+  transform: translate(8px, 1px);
+}
+
 .contentBoxResult .contentBoxIcon {
   justify-items: start;
-  width: 30px;
+  width: 17px;
   height: 1.45em;
 }
 
@@ -701,14 +707,36 @@ body {
 
 .contentBoxText {
   position: relative;
-  top: -3px;
+  align-self: center;
   min-width: 0;
+  line-height: inherit;
   font-weight: 500;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.resultBoxContent .contentBoxText,
+.resultBoxContent .contentBoxIcon,
+.resultBoxContent .contentBoxAction {
+  transition: opacity 0.12s ease;
+}
+
+.resultBoxContent--fading .contentBoxText,
+.resultBoxContent--fading .contentBoxAction,
+.resultBoxContent--preparing .contentBoxText,
+.resultBoxContent--preparing .contentBoxIcon,
+.resultBoxContent--closing .contentBoxText,
+.resultBoxContent--closing .contentBoxIcon,
+.resultBoxContent--closing .contentBoxAction,
+.resultBoxContent--revealing .contentBoxText,
+.resultBoxContent--revealing .contentBoxAction {
+  opacity: 0;
 }
 
 .contentBoxIcon,
 .contentBoxAction {
+  position: relative;
+  top: 3px;
   display: grid;
   width: 32px;
   height: 1.45em;
@@ -722,6 +750,8 @@ body {
 }
 
 .contentBoxAction {
+  align-self: start;
+  top: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -849,7 +879,7 @@ button.contentBoxAction:focus-visible {
   gap: 8px;
   padding: 24px 16px;
   text-align: center;
-  transform: translateY(-18px);
+  transform: translateY(-15px);
 }
 
 .uploadPrompt > svg {
@@ -968,9 +998,9 @@ button.contentBoxAction:focus-visible {
 
 .spinnerGreen {
   position: relative;
-  top: -3px;
-  width: 16px;
-  height: 16px;
+  top: -1px;
+  width: 17px;
+  height: 17px;
   border: 2px solid var(--neutral-panel-border);
   border-top-color: transparent;
   border-radius: 50%;
@@ -1111,6 +1141,11 @@ button.contentBoxAction:focus-visible {
     -webkit-tap-highlight-color: transparent;
   }
 
+  .controlsRow {
+    padding-left: 20px;
+    padding-right: 17px;
+  }
+
   .controlLink:focus,
   .controlLink:focus-visible,
   .btnPrimary:focus,
@@ -1151,11 +1186,11 @@ button.contentBoxAction:focus-visible {
   }
 
   .contentBoxLoading {
-    grid-template-columns: 27px minmax(0, 1fr);
+    grid-template-columns: 17px minmax(0, 1fr);
   }
 
   .contentBoxResult .contentBoxIcon {
-    width: 27px;
+    width: 17px;
     height: 1.45em;
   }
 
@@ -1318,6 +1353,8 @@ button.contentBoxAction:focus-visible {
 .subtitleTyped {
   position: absolute;
   inset: 0;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .subtitleCharacterHidden {
