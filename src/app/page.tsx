@@ -9,7 +9,6 @@ import RevealPanel from './components/RevealPanel';
 import Message from './components/Message';
 import Icon from './components/Icon';
 import Subtitle from './components/Subtitle';
-import ThemeSwitch from './components/ThemeSwitch';
 import { usePanel } from './hooks/usePanel';
 
 export default function AltTextGenerator() {
@@ -51,7 +50,6 @@ export default function AltTextGenerator() {
 
   return (
     <div className="flex min-h-svh items-start justify-center px-4 py-14 max-[540px]:px-3 max-[540px]:py-5 max-[360px]:px-2">
-      <ThemeSwitch />
       <RevealPanel className="appBoxReveal" open={appOpen}>
       <main className="box-border w-full max-w-[35rem] rounded-3xl bg-[var(--surface)] px-[calc(2.35rem+2px)] pt-[calc(2.35rem-12px)] pb-[calc(2.35rem-19px)] max-[540px]:max-w-full max-[540px]:rounded-xl max-[540px]:px-[18px] max-[540px]:py-[12px] max-[360px]:px-[14px]" id="main-content">
         <div className="titleHeader mb-7">

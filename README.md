@@ -10,7 +10,7 @@ Choose an OpenAI API model or run the local image captioning and rephrasing mode
 - Automatic alt-text generation after the image is validated
 - OpenAI API and local browser inference methods
 - Local model download progress, cache detection, and cache removal
-- Responsive interface with a light/dark theme switch
+- Responsive interface that follows the device or browser light/dark preference
 - Copy generated text with one click
 - Privacy, model, and license details at `/info`
 

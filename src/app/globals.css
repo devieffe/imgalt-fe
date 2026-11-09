@@ -57,7 +57,8 @@
   color-scheme: light;
 }
 
-:root[data-theme="dark"] {
+@media (prefers-color-scheme: dark) {
+  :root {
     --bg: #18181b;
     --page-bg: #18181b;
     --control-link-color: #a1a1aa;
@@ -109,6 +110,7 @@
 
     --divider: #52525b;
     color-scheme: dark;
+  }
 }
 
 @keyframes spin {
@@ -965,6 +967,8 @@ button.contentBoxAction:focus-visible {
 
 
 .spinnerGreen {
+  position: relative;
+  top: -3px;
   width: 16px;
   height: 16px;
   border: 2px solid var(--neutral-panel-border);
@@ -1322,28 +1326,4 @@ button.contentBoxAction:focus-visible {
 
 .subtitleCharacterHidden {
   visibility: hidden;
-}
-
-.themeSwitch {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 20;
-  padding: 6px 10px;
-  border: 0;
-  border-radius: 6px;
-  background: var(--surface);
-  color: var(--muted);
-  font: inherit;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-
-.themeSwitch:hover {
-  color: var(--fg);
-}
-
-.themeSwitch:focus-visible {
-  outline: 2px solid var(--btn-hover);
-  outline-offset: 2px;
 }
