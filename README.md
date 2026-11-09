@@ -1,6 +1,6 @@
 # ImgAlt
 
-ImgAlt drafts accessible alt text for images. Upload a JPEG, PNG, or WebP image, or provide an image URL, then review and copy the suggested description. The app generates text descriptions; it does not generate or edit images.
+ImgAlt drafts alt text for images. Upload a JPEG, PNG, or WebP image, or provide an image URL, then review and copy the suggested description. The app generates text descriptions; it does not generate or edit images.
 
 Choose an OpenAI API model or run the local image captioning and rephrasing models in the browser. Output styles are Normal, Short, Detailed, and Creative.
 
