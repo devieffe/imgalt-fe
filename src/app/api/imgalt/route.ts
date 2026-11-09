@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { API_PROMPTS } from '../../lib/styleRules';
+import { API_MODEL } from '../../lib/modelInfo';
 
 export const runtime = 'nodejs';
 
@@ -32,6 +33,10 @@ function checkRateLimit(key: string): { allowed: boolean; retryAfterSec: number 
   return { allowed: true, retryAfterSec: 0 };
 }
 
+export async function GET() {
+  return NextResponse.json({ configured: Boolean(process.env.OPENAI_API_KEY) }, { headers: { 'Cache-Control': 'no-store' } });
+}
+
 export async function POST(req: Request) {
   try {
     if (!req.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
@@ -58,7 +63,7 @@ export async function POST(req: Request) {
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: 'Image generation is not configured.' }, { status: 503 });
+      return NextResponse.json({ error: 'Alt-text generation is not configured.' }, { status: 503 });
     }
 
     const { allowed, retryAfterSec } = checkRateLimit(getClientKey(req));
@@ -74,7 +79,8 @@ export async function POST(req: Request) {
     const prompt = API_PROMPTS[outputStyle as keyof typeof API_PROMPTS] ?? API_PROMPTS.normal;
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: API_MODEL.id,
+      reasoning_effort: 'none',
       messages: [
         {
           role: 'user',
@@ -92,13 +98,13 @@ export async function POST(req: Request) {
           ],
         },
       ],
-      max_tokens: 150,
+      max_completion_tokens: 150,
     });
 
     const altText = response.choices[0]?.message?.content ?? 'No description generated.';
     return NextResponse.json({ alt: altText });
   } catch (error) {
-    console.error('Image generation failed:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Alt-text generation failed:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Image processing failed.' }, { status: 500 });
   }
 }

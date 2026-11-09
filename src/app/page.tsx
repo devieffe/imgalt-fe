@@ -4,29 +4,45 @@ import { useEffect, useState } from 'react';
 import { useAltText } from './hooks/useAltText';
 import AdvancedSection from './components/AdvancedSection';
 import ImageInput from './components/ImageInput';
-import ImagePreview from './components/ImagePreview';
 import ResultBox from './components/ResultBox';
+import RevealPanel from './components/RevealPanel';
+import Message from './components/Message';
 import Icon from './components/Icon';
+import Subtitle from './components/Subtitle';
+import ThemeSwitch from './components/ThemeSwitch';
+import { usePanel } from './hooks/usePanel';
 
 export default function AltTextGenerator() {
   const [hydrated, setHydrated] = useState(false);
+  const [loadedImageVersion, setLoadedImageVersion] = useState(-1);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const { isOpen: appOpen, openPanel: openAppPanel } = usePanel();
   useEffect(() => setHydrated(true), []);
+  useEffect(() => {
+    if (hydrated) openAppPanel();
+  }, [hydrated, openAppPanel]);
 
-  const [urlOpen, setUrlOpen] = useState(false);
-  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const urlPanel = usePanel();
+  const advancedPanel = usePanel();
 
   const {
     imageSrc,
+    imageVersion,
+    imageUploadVersion,
+    handlePreviewLoaded,
     imageUrlInput, setImageUrlInput,
     altText,
     error, setError,
-    urlError,
+    urlError, setUrlError,
     loading,
+    imageValidated,
     copied,
-    method, changeMethod,
+    method, changeMethod, prepareLocalModel,
     outputStyle, setOutputStyle,
-    localStatus, modelReady, modelCached,
-    handleUpload,
+    localStatus, modelReady, modelCached, modelCachePresent, modelWorking, apiWorking, downloadProgress, downloadedBytes, downloadTotalBytes,
+    deleteLocalModel, deletingModel,
+    cancelLocalModelSetup,
+    handleUpload, removeImage,
     handleUrlSubmit,
     handleCopy,
   } = useAltText();
@@ -34,48 +50,56 @@ export default function AltTextGenerator() {
   if (!hydrated) return null;
 
   return (
-    <div className="wrapper">
-      <main className="card" id="main-content">
-        <div className="header">
-          <h1 className="title">Generate alt text</h1>
-          <p className="subtitle">Instantly get accessible alt text for web images using AI.</p>
+    <div className="flex min-h-svh items-start justify-center px-4 py-14 max-[540px]:px-3 max-[540px]:py-5 max-[360px]:px-2">
+      <ThemeSwitch />
+      <RevealPanel className="appBoxReveal" open={appOpen}>
+      <main className="box-border w-full max-w-[35rem] rounded-3xl bg-[var(--surface)] px-[calc(2.35rem+2px)] pt-[calc(2.35rem-12px)] pb-[calc(2.35rem-19px)] max-[540px]:max-w-full max-[540px]:rounded-xl max-[540px]:px-[18px] max-[540px]:py-[12px] max-[360px]:px-[14px]" id="main-content">
+        <div className="titleHeader mb-7">
+          <h1 className="title">alt</h1>
+          <Subtitle />
         </div>
 
-        <div className="form">
-          {error && (
-            <div role="alert" className="alert alertError">
-              <Icon name="warning" className="alertErrorIcon" />
-              <span>{error}</span>
-              <button onClick={() => setError('')} className="alertErrorDismiss" aria-label="Dismiss error">
-                <Icon name="close" />
-              </button>
-            </div>
-          )}
-
-          <ImagePreview src={imageSrc} />
-
-          <ResultBox loading={loading} altText={altText} copied={copied} onCopy={handleCopy} />
-
+        <div className="flex flex-col gap-5">
           <section className="uploadGroup" aria-label="Image input and settings">
             <ImageInput
-              urlOpen={urlOpen}
+              urlOpen={urlPanel.isOpen}
               urlError={urlError}
               value={imageUrlInput}
               onChange={setImageUrlInput}
+              onUrlErrorDismiss={() => setUrlError('')}
               onSubmit={handleUrlSubmit}
+              imageSrc={imageSrc}
+              imageVersion={imageVersion}
+              onPreviewLoad={(src) => {
+                setLoadedImageVersion(imageVersion);
+                handlePreviewLoaded(src);
+              }}
               onUpload={handleUpload}
-            />
+              onRemove={removeImage}
+            >
+              <Message message={!imageSrc || loadedImageVersion === imageVersion ? error : ''} onDismiss={() => setError('')} keepUntilClosed timerResetKey={imageUploadVersion} onVisibilityChange={setAlertVisible} />
+              <ResultBox
+                loading={loading}
+                imageValidated={imageValidated}
+                altText={altText}
+                error={error || urlError}
+                blocked={alertVisible}
+                retainWhileUploading={Boolean(imageSrc) && !imageValidated}
+                copied={copied}
+                onCopy={handleCopy}
+              />
+            </ImageInput>
 
             <div className="controlsRow">
-              <button className="controlLink" type="button" aria-expanded={advancedOpen} aria-controls="advanced-settings" onClick={() => setAdvancedOpen(o => !o)}>
+              <button className="controlLink" type="button" aria-expanded={advancedPanel.isOpen} aria-controls="advanced-settings" onClick={advancedPanel.togglePanel}>
                 <span className="controlLinkContent">
                   Advanced
-                  <Icon name={advancedOpen ? 'chevronUp' : 'chevronDown'} className="controlLinkIcon" />
+                  <Icon name={advancedPanel.isOpen ? 'chevronUp' : 'chevronDown'} className="controlLinkIcon" />
                 </span>
               </button>
-              <button className="controlLink" type="button" aria-expanded={urlOpen} aria-controls="image-url-form" onClick={() => setUrlOpen(o => !o)}>
+              <button className="controlLink" type="button" aria-expanded={urlPanel.isOpen} aria-controls="image-url-form" onClick={urlPanel.togglePanel}>
                 <span className="controlLinkContent">
-                  <Icon name={urlOpen ? 'minus' : 'plus'} className="controlLinkIcon" />
+                  <Icon name={urlPanel.isOpen ? 'minus' : 'plus'} className="controlLinkIcon" />
                   Add URL
                 </span>
               </button>
@@ -84,18 +108,29 @@ export default function AltTextGenerator() {
 
           <div id="advanced-settings">
           <AdvancedSection
-            open={advancedOpen}
+            open={advancedPanel.isOpen}
             method={method}
             localStatus={localStatus}
             modelReady={modelReady}
             modelCached={modelCached}
+            modelCachePresent={modelCachePresent}
+            modelWorking={modelWorking}
+            apiWorking={apiWorking}
+            downloadProgress={downloadProgress}
+            downloadedBytes={downloadedBytes}
+            downloadTotalBytes={downloadTotalBytes}
             outputStyle={outputStyle}
             onMethodChange={changeMethod}
+            onPrepareLocalModel={prepareLocalModel}
+            onDeleteLocalModel={deleteLocalModel}
+            onCancelLocalModelSetup={cancelLocalModelSetup}
+            deleteDisabled={deletingModel || loading || localStatus === 'downloading' || localStatus === 'Loading model into memory…'}
             onStyleChange={setOutputStyle}
           />
           </div>
         </div>
       </main>
+      </RevealPanel>
     </div>
   );
 }

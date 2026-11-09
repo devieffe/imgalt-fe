@@ -5,22 +5,38 @@
   --upload-control-height: 40px;
   --upload-control-font-size: 18px;
   --bg: #f4f4f5;
+  --page-bg: #fafafa;
+  --control-link-color: #85858d;
+  --control-link-display: color-mix(in srgb, var(--control-link-color) 70%, transparent);
   --fg: #18181b;
   --surface: #ffffff;
+  --dot-opacity: 12%;
   --border: #d4d4d8;
   --muted: #71717a;
 
-  --accent: #ff4000e3;
+  --accent: #ff6938e3;
   --accent-hover: #f97316;
   --accent-light: #fff7ed;
   --accent-border: #fdba74;
 
-  --btn: #ea580c;
-  --btn-hover: #f97316;
+  --btn: #f97316;
+  --btn-hover: #fb923c;
   --btn-off: #a1a1aa;
   --btn-off-text: #f4f4f5;
-
-  --preview-bg: #e4e4e7;
+  --submit-bg: #9ac36c;
+  --submit-text: #166534;
+  --submit-hover-bg: #89b25d;
+  --submit-hover-text: #166534;
+  --submit-ready-bg: #9ac36c;
+  --submit-ready-text: #166534;
+  --submit-disabled-bg: #b6d588;
+  --submit-disabled-text: var(--bg);
+  --result-bg: #fff;
+  --result-text: #3f3f46;
+  --confirm-border: color-mix(in srgb, var(--bg) 90%, black);
+  --confirm-border-hover: color-mix(in srgb, var(--bg) 82%, black);
+  --pill-border: color-mix(in srgb, var(--bg) 90%, black);
+  --pill-border-hover: color-mix(in srgb, var(--bg) 82%, black);
 
   --error-bg: #fff1f2;
   --error-text: #be123c;
@@ -41,11 +57,14 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+:root[data-theme="dark"] {
     --bg: #18181b;
+    --page-bg: #18181b;
+    --control-link-color: #a1a1aa;
+    --control-link-display: var(--muted);
     --fg: #f4f4f5;
     --surface: #27272a;
+    --dot-opacity: 28%;
     --border: #52525b;
     --muted: #a1a1aa;
 
@@ -54,10 +73,24 @@
     --accent-light: #431407;
     --accent-border: #c2410c;
 
+    --btn: #ea580c;
+    --btn-hover: #f97316;
     --btn-off: #3f3f46;
     --btn-off-text: #71717a;
-
-    --preview-bg: #3f3f46;
+    --submit-bg: var(--bg);
+    --submit-text: var(--fg);
+    --submit-hover-bg: var(--btn-hover);
+    --submit-hover-text: #fff;
+    --submit-ready-bg: var(--btn);
+    --submit-ready-text: #fff;
+    --submit-disabled-bg: var(--btn-off);
+    --submit-disabled-text: var(--btn-off-text);
+    --result-bg: var(--neutral-panel-bg);
+    --result-text: var(--neutral-panel-text);
+    --confirm-border: var(--neutral-panel-border);
+    --confirm-border-hover: var(--muted);
+    --pill-border: var(--border);
+    --pill-border-hover: var(--btn);
 
     --error-bg: #2d1b1f;
     --error-text: #fda4af;
@@ -76,7 +109,6 @@
 
     --divider: #52525b;
     color-scheme: dark;
-  }
 }
 
 @keyframes spin {
@@ -86,47 +118,46 @@
 }
 
 body {
+  cursor: default;
   margin: 0;
-  background: var(--bg);
+  background: var(--page-bg);
   color: var(--fg);
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-.wrapper {
-  min-height: 100vh;
-  min-height: 100svh;
+.titleHeader {
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 3.5rem 1rem;
-}
-
-.card {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 35rem;
-  background: var(--surface);
-  border-radius: 24px;
-  padding: 2.35rem 2.35rem calc(2.35rem - 7px);
-}
-
-.header {
-  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
 }
 
 .title {
+  position: relative;
+  left: calc(0.75rem - 3px);
   color: var(--accent);
   font-family: 'Doto', system-ui, sans-serif;
   font-weight: 800;
   font-size: clamp(1.6rem, 5vw, 2rem);
   letter-spacing: .02em;
+
   margin: 0;
 }
 
+.titleSpace {
+  font-size: .5em;
+}
+
 .subtitle {
+  font-family: inherit;
   color: var(--muted);
-  font-size: 1rem;
-  margin: .25rem 0 0;
+  max-width: 9rem;
+  font-size: .75rem;
+  line-height: 1.2;
+  text-align: left;
+  margin: 0 0 0 auto;
+  transform: translateX(8px);
 }
 
 .uploadGroup {
@@ -138,18 +169,14 @@ body {
 .uploadAction {
   position: relative;
   width: 100%;
-  height: var(--upload-control-height);
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  min-height: 156px;
+  border-radius: 12px;
 }
 
 .urlRow {
   position: relative;
   display: flex;
+  align-items: center;
   width: 100%;
   height: 100%;
 }
@@ -157,11 +184,24 @@ body {
 .methodRow {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0;
   margin-bottom: 0;
   margin-top: 0;
   border-top: 0;
   padding-top: 0;
+}
+
+.methodRow > .methodLabel {
+  margin-bottom: 6px;
+}
+
+.methodSelectorGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.methodSelectorGroup > .advancedBody > .advancedInner > .confirmBox {
+  margin-top: 13px;
 }
 
 .methodLabel {
@@ -172,10 +212,29 @@ body {
   color: var(--muted);
 }
 
-.methodSelect {
+.methodDropdown {
   background: var(--bg);
-  border: none;
   border-radius: 10px;
+  overflow: hidden;
+}
+
+.methodInputRow {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.methodSelect {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  width: 100%;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   color: var(--fg);
   font-size: 1rem;
   font-family: inherit;
@@ -194,22 +253,137 @@ body {
   margin-bottom: 0;
 }
 
-.methodNote {
-  font-size: 12px;
+.methodSelect.methodSelectWithDelete {
+  padding-right: 42px;
+}
+
+.methodSelect > span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.methodValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.methodOption {
+  gap: 8px;
+}
+
+.methodOptionText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.methodStatus {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.methodStatusAvailable { background: #35a866; }
+.methodStatusUnavailable { background: #e05b55; }
+
+.methodStatusText {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.methodChevron {
+  flex: none;
+  width: 18px;
+  height: 18px;
   color: var(--muted);
-  background: var(--bg);
-  border-radius: 10px;
-  padding: 9px 12px;
-  line-height: 1.5;
+}
+
+.methodDropdown > .advancedBody,
+.methodDropdown > .advancedBody > .advancedInner,
+.methodOptions {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.methodOption {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--upload-control-height);
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  text-align: left;
+  cursor: pointer;
+}
+
+.methodOption {
+  color: var(--muted);
+}
+
+.methodOption:hover,
+.methodOption:focus-visible {
+  color: var(--fg);
+  outline: none;
+}
+
+.deleteModelButton {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  z-index: 1;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.deleteModelButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.deleteModelButton:disabled {
+  opacity: 0.5;
+  cursor: wait;
 }
 
 .confirmBox {
   box-sizing: border-box;
   position: relative;
   background: var(--surface);
-  border: 1px solid var(--neutral-panel-border);
+  border: 1px solid var(--confirm-border);
   border-radius: 10px;
-  padding: 14px 16px;
+  padding: 14px 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -235,6 +409,9 @@ body {
 }
 
 .confirmOk {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   flex: 3;
   padding: 10px 14px;
   border-radius: 6px;
@@ -247,7 +424,17 @@ body {
   transition: background 0.15s;
 }
 
-.confirmOk:hover {
+.confirmOkProgress::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto 0 0;
+  width: var(--download-progress, 0%);
+  background: rgb(0 0 0 / 14%);
+  transition: width 0.2s ease;
+}
+
+.confirmOk:hover:not(:disabled) {
   background: #1d4ed8;
 }
 
@@ -256,7 +443,7 @@ body {
   padding: 10px 14px;
   text-align: center;
   border-radius: 6px;
-  border: 1px solid var(--neutral-panel-border);
+  border: 1px solid var(--confirm-border);
   background: transparent;
   color: var(--muted);
   font-size: 14px;
@@ -266,7 +453,7 @@ body {
 }
 
 .confirmCancel:hover {
-  border-color: var(--muted);
+  border-color: var(--confirm-border-hover);
   color: var(--fg);
 }
 
@@ -307,11 +494,11 @@ body {
 
 .btnPrimary {
   position: relative;
-  background: var(--bg);
-  color: var(--fg);
+  background: var(--submit-bg);
+  color: var(--submit-text);
   border: none;
-  border-radius: 8px;
-  padding: 4px 10px;
+  border-radius: 6px;
+  padding: 3px 9px;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
@@ -319,22 +506,22 @@ body {
 }
 
 .btnPrimary:hover:not(:disabled) {
-  background: var(--btn-hover);
-  color: #fff;
+  background: var(--submit-hover-bg);
+  color: var(--submit-hover-text);
 }
 
 .btnPrimaryReady {
-  background: var(--btn);
-  color: #fff;
+  background: var(--submit-ready-bg);
+  color: var(--submit-ready-text);
 }
 
 .btnPrimaryReady:hover {
-  background: var(--btn-hover);
+  background: var(--submit-hover-bg);
 }
 
 .btnPrimary:disabled {
-  background: var(--btn-off);
-  color: var(--btn-off-text);
+  background: var(--submit-disabled-bg);
+  color: var(--submit-disabled-text);
   cursor: default;
 }
 
@@ -351,7 +538,7 @@ body {
   padding: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--control-link-display);
   cursor: pointer;
   text-decoration: none;
   transition: color 0.15s;
@@ -385,7 +572,6 @@ body {
 .confirmCancel:focus-visible,
 .copyBtn:focus-visible,
 .methodSelect:focus-visible,
-.uploadLabel:focus-within,
 .input:focus-visible {
   outline: 3px solid var(--btn-hover);
   outline-offset: 3px;
@@ -416,140 +602,304 @@ body {
 }
 
 .urlSlide {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: 0fr;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.12s ease, visibility 0s linear 0.12s;
+  transition: grid-template-rows 0.25s ease, opacity 0.12s ease, visibility 0s linear 0.25s;
 }
 
 .urlSlideOpen {
+  grid-template-rows: 1fr;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transition: opacity 0.12s ease, visibility 0s;
+  transition: grid-template-rows 0.25s ease, opacity 0.12s ease, visibility 0s;
 }
 
 .urlSlideInner {
+  min-height: 0;
+  overflow: hidden;
   width: 100%;
-  height: 100%;
-  background: var(--surface);
-  border-radius: 10px;
 }
 
-.fieldError {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 11;
-  margin: 0.4rem 0 0;
-  padding: 0.4rem 0.6rem;
-  border-radius: 0.5rem;
+.contentBox {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  align-items: start;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 13px 15px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--neutral-panel-bg);
+  color: var(--neutral-panel-text);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.contentBoxAlert {
   background: var(--error-bg);
   color: var(--error-text);
-  font-size: 0.85rem;
 }
 
-.urlSlideInner .urlRow {
-  height: 100%;
+.contentBoxInline {
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 0.35rem;
 }
 
-.uploadLabel {
+.contentBoxResult {
   position: relative;
-  z-index: 1;
-  display: block;
+  background: var(--result-bg);
+  color: var(--result-text);
+}
+
+.contentBoxLoading {
+  grid-template-columns: 30px minmax(0, 1fr);
+}
+
+.contentBox.contentBoxLoading {
+  gap: 0;
+}
+
+.contentBoxAction svg {
+  transform: translate(8px, -1px);
+}
+
+.contentBoxResult .contentBoxIcon {
+  justify-items: start;
+  width: 30px;
+  height: 1.45em;
+}
+
+.contentBoxCopy {
+  position: absolute;
+  inset: 0;
   width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
   cursor: pointer;
 }
 
-.uploadLabel:focus-within .uploadBtn {
-  outline: 3px solid var(--btn-hover);
+.contentBoxCopy:disabled {
+  cursor: default;
+}
+
+.contentBoxCopy:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+.contentBoxText {
+  position: relative;
+  top: -3px;
+  min-width: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.contentBoxIcon,
+.contentBoxAction {
+  display: grid;
+  width: 32px;
+  height: 1.45em;
+  place-items: center;
+}
+
+.contentBoxIcon svg,
+.contentBoxAction svg {
+  width: 18px;
+  height: 18px;
+}
+
+.contentBoxAction {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+button.contentBoxAction {
+  cursor: pointer;
+}
+
+button.contentBoxAction:focus-visible {
+  outline: 2px solid currentColor;
   outline-offset: 3px;
 }
 
-.uploadLabel .hidden {
+.urlSlideInner .urlRow {
+  height: auto;
+  margin-top: 10px;
+}
+
+.smoothHeight {
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+.uploadWindow {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+}
+
+.uploadWindow::before {
+  content: '';
   position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--fg) var(--dot-opacity), transparent) 1px, transparent 1px);
+  background-size: 8px 8px;
+  mask-image: linear-gradient(to bottom, transparent, black 40%);
+}
+
+.uploadDropzone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 156px;
+  box-sizing: border-box;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  text-align: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.uploadDropzone.uploadDropzoneEmpty {
+  min-height: 300px;
+}
+
+.removeImageButton {
+  position: absolute;
+  z-index: 2;
+  top: 17px;
+  right: 17px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 12%);
+  color: white;
+  cursor: pointer;
+}
+
+.removeImageButton svg {
+  width: 100%;
+  height: 100%;
+}
+
+.removeImageButton:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.uploadWindowResult {
+  padding: 0 8px;
+}
+
+.uploadWindowResult > .advancedBody > .advancedInner > .smoothHeight > div {
+  padding-bottom: 8px;
+}
+
+.uploadDropzone:focus-visible {
+  outline: 3px solid var(--btn-hover);
+  outline-offset: -3px;
+}
+
+.uploadFileInput {
+  position: absolute;
+  left: -1px;
   width: 1px;
   height: 1px;
   padding: 0;
-  margin: -1px;
+  margin: 0;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
 }
 
-.uploadBtn {
-  background: var(--btn);
-  border-radius: 10px;
-  color: #fff;
-  width: 100%;
-  box-sizing: border-box;
-  height: var(--upload-control-height);
-  padding: 10px 18px;
-  font-weight: 600;
-  font-size: 1rem;
+.uploadPrompt {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 24px 16px;
+  text-align: center;
+  transform: translateY(-18px);
 }
 
-.uploadBtn svg {
-  width: 1.25em;
-  height: 1.25em;
+.uploadPrompt > svg {
+  width: 30px;
+  height: 30px;
+  color: currentColor;
   flex: none;
 }
 
-.uploadBtn:hover {
-  background: var(--btn-hover);
+.uploadPromptTitle {
+  font-size: 1rem;
+  font-weight: 650;
 }
 
-.alert {
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 18px;
+.uploadReplaceHint {
+  color: var(--muted);
+  font-size: .875rem;
+}
+
+.uploadWindowImageContent {
   display: flex;
-  align-items: center;
-  gap: 10px;
   width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
   box-sizing: border-box;
 }
 
-.alertError {
-  background: var(--error-bg);
-  color: var(--error-text);
-  align-items: flex-start;
+.uploadWindowImageContent .preview {
+  border-radius: 8px;
 }
 
-.alertErrorDismiss:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 3px;
+.uploadReplaceHint {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--surface);
 }
 
-.alertErrorIcon {
-  flex-shrink: 0;
-  line-height: 1.4;
-}
-
-.alertErrorDismiss {
-  margin-left: auto;
-  background: none;
-  border: none;
-  color: var(--error-text);
-  cursor: pointer;
-  padding: 0;
-  flex-shrink: 0;
-  display: flex;
+.uploadReplaceHint svg {
+  width: 1em;
+  height: 1em;
 }
 
 .preview {
+  display: block;
+  box-sizing: border-box;
   border-radius: 10px;
   overflow: hidden;
-  background: var(--preview-bg);
   width: 100%;
   animation: revealDown 0.45s ease;
 }
@@ -612,40 +962,7 @@ body {
   animation: spin .7s linear infinite;
 }
 
-.resultBox {
-  background: var(--neutral-panel-bg);
-  color: var(--neutral-panel-text);
-  border: 1px solid var(--neutral-panel-border);
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 18px;
-  min-height: 5em;
-  width: 100%;
-  box-sizing: border-box;
-  position: relative;
-}
 
-.resultLoading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-right: 2rem;
-  padding-top: 4px;
-}
-
-@keyframes fadeOutMsg {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
-
-.resultLoadingFade {
-  animation: fadeOutMsg 0.4s ease forwards;
-}
 
 .spinnerGreen {
   width: 16px;
@@ -658,34 +975,20 @@ body {
   display: block;
 }
 
-.copyBtn {
-  position: absolute;
-  top: 10px;
-  right: 6px;
-  background: transparent;
-  border: none;
-  border-radius: 10px;
-  color: var(--neutral-panel-text);
-  cursor: pointer;
-  font-size: 1.1rem;
-  padding: 2px 6px;
-  display: flex;
-  align-items: center;
-}
 
-.altText {
-  margin: 0;
-  line-height: 1.6;
-  color: var(--neutral-panel-text);
-  font-size: 18px;
-  padding-right: 2rem;
-}
 
 /* ── Advanced accordion ───────────────────────────────── */
+.appBoxReveal {
+  width: 100%;
+  flex: 0 1 35rem;
+  box-sizing: border-box;
+  max-width: 35rem;
+}
+
 .advanced {
   border-radius: 0;
   overflow: hidden;
-  background: var(--surface);
+  background: transparent;
 }
 
 .advancedBody {
@@ -699,6 +1002,16 @@ body {
   grid-template-rows: 1fr;
 }
 
+.messageReveal {
+  opacity: 0;
+  transition: grid-template-rows 0.6s ease, opacity 0.6s ease;
+}
+
+.messageReveal.advancedBodyOpen {
+  opacity: 1;
+  transition: grid-template-rows 0.25s ease, opacity 0.25s ease;
+}
+
 .advancedInner {
   overflow: hidden;
   min-height: 0;
@@ -707,8 +1020,8 @@ body {
 .advancedContent {
   display: flex;
   flex-direction: column;
-  gap: 13px;
-  padding: 0 0 14px;
+  gap: 28px;
+  padding: 8px 0 24px;
 }
 
 /* ── Output style pills ───────────────────────────────── */
@@ -726,9 +1039,10 @@ body {
 }
 
 .stylePill {
+  position: relative;
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--pill-border);
   background: transparent;
   color: var(--muted);
   font-size: 13px;
@@ -738,12 +1052,19 @@ body {
   white-space: nowrap;
 }
 
+.stylePill::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+}
+
 .stylePill:hover {
-  border-color: var(--btn);
+  border-color: var(--pill-border-hover);
   color: var(--fg);
 }
 
-.stylePillActive {
+.stylePillActive,
+.stylePillActive:hover {
   background: var(--btn);
   border-color: var(--btn);
   color: #fff;
@@ -779,9 +1100,10 @@ body {
   .confirmCancel,
   .copyBtn,
   .methodSelect,
-  .uploadLabel,
+  .uploadDropzone,
+  .uploadFileInput,
   .input,
-  .alertErrorDismiss {
+  .contentBoxAction {
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -799,41 +1121,65 @@ body {
   .copyBtn:focus-visible,
   .methodSelect:focus,
   .methodSelect:focus-visible,
-  .uploadLabel:focus-within,
+  .uploadDropzone:focus-visible,
   .input:focus,
   .input:focus-visible,
-  .alertErrorDismiss:focus,
-  .alertErrorDismiss:focus-visible {
+  .contentBoxAction:focus,
+  .contentBoxAction:focus-visible {
     outline: none;
     box-shadow: none;
-  }
-
-  .wrapper {
-    padding: 1.25rem 0.75rem;
-    align-items: flex-start;
-  }
-
-  .card {
-    max-width: 100%;
-    border-radius: 12px;
-    padding: 1.5rem 1rem;
   }
 
   .title {
     font-size: 1.6rem;
   }
 
-  .subtitle {
+  .contentBox {
+    padding: 9px 12px 11px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    gap: 9px;
+    grid-template-columns: minmax(0, 1fr) 28px;
+  }
+
+  .contentBoxInline {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contentBoxLoading {
+    grid-template-columns: 27px minmax(0, 1fr);
+  }
+
+  .contentBoxResult .contentBoxIcon {
+    width: 27px;
+    height: 1.45em;
+  }
+
+  .contentBoxAction {
+    width: 28px;
+  }
+
+  .removeImageButton {
+    top: 12px;
+    right: 12px;
+  }
+
+  .methodSelect,
+  .methodOption {
     font-size: 0.9rem;
   }
 
-  .methodSelect {
-    font-size: 0.9rem;
+  .uploadAction,
+  .uploadDropzone {
+    min-height: 140px;
   }
 
-  .uploadBtn {
-    font-size: 1rem;
-    padding: 11px 14px;
+  .uploadDropzone.uploadDropzoneEmpty {
+    min-height: 270px;
+  }
+
+  .uploadPrompt {
+    padding: 20px 12px;
   }
 
   .input {
@@ -842,7 +1188,7 @@ body {
   }
 
   .btnPrimary {
-    padding: 7px 8px;
+    padding: 6px 7px;
     font-size: 0.95rem;
   }
 
@@ -859,9 +1205,13 @@ body {
     padding: 7px 12px;
   }
 
-  .methodSelect {
-    width: 100%;
+  .methodSelect,
+  .methodOption {
     padding: 10px;
+  }
+
+  .deleteModelButton {
+    width: 32px;
   }
 
   .confirmActions {
@@ -880,16 +1230,6 @@ body {
 }
 
 @media (max-width: 360px) {
-  .wrapper {
-    padding-right: 0.5rem;
-    padding-left: 0.5rem;
-  }
-
-  .card {
-    padding-right: 0.75rem;
-    padding-left: 0.75rem;
-  }
-
   .controlsRow {
     gap: 0.5rem;
   }
@@ -897,4 +1237,113 @@ body {
   .controlLink {
     font-size: 0.9rem;
   }
+}
+
+/* Stagger the app's entrance without changing its resting layout. */
+.appBoxReveal {
+  opacity: 0;
+  transition: grid-template-rows 0.55s cubic-bezier(.22, 1, .36, 1), opacity 0.45s ease;
+}
+
+.appBoxReveal.advancedBodyOpen {
+  opacity: 1;
+}
+
+.appBoxReveal .title,
+.appBoxReveal .subtitle,
+.appBoxReveal .uploadWindow,
+.appBoxReveal .controlLink {
+  opacity: 0;
+  translate: 0 12px;
+  transition: opacity 0.45s ease, translate 0.55s cubic-bezier(.22, 1, .36, 1);
+}
+
+.appBoxReveal .controlLink {
+  transition: color 0.15s, opacity 0.45s ease, translate 0.55s cubic-bezier(.22, 1, .36, 1);
+}
+
+.appBoxReveal.advancedBodyOpen .title,
+.appBoxReveal.advancedBodyOpen .subtitle,
+.appBoxReveal.advancedBodyOpen .uploadWindow,
+.appBoxReveal.advancedBodyOpen .controlLink {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.appBoxReveal.advancedBodyOpen .title { transition-delay: 0.04s; }
+.appBoxReveal.advancedBodyOpen .subtitle { transition-delay: 0.1s; }
+.appBoxReveal.advancedBodyOpen .uploadWindow { transition-delay: 0.16s; }
+.appBoxReveal.advancedBodyOpen .controlLink:first-child { transition-delay: 0s, 0.23s, 0.23s; }
+.appBoxReveal.advancedBodyOpen .controlLink:last-child { transition-delay: 0s, 0.28s, 0.28s; }
+
+/* Settings and dropdown content follow their existing accordion motion. */
+.advanced > .advancedBody > .advancedInner > .advancedContent > *,
+.methodDropdown > .advancedBody > .advancedInner > .methodOptions {
+  opacity: 0;
+  translate: 0 -6px;
+  transition: opacity 0.22s ease, translate 0.3s cubic-bezier(.22, 1, .36, 1);
+}
+
+.advanced > .advancedBodyOpen > .advancedInner > .advancedContent > *,
+.methodDropdown > .advancedBodyOpen > .advancedInner > .methodOptions {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.advanced > .advancedBodyOpen > .advancedInner > .advancedContent > :last-child {
+  transition-delay: 0.06s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-delay: 0s !important;
+    transition-delay: 0s !important;
+  }
+}
+
+.subtitle {
+  position: relative;
+}
+
+.subtitleMeasure {
+  color: transparent;
+}
+
+.subtitleTyped {
+  position: absolute;
+  inset: 0;
+}
+
+.subtitleCharacterHidden {
+  visibility: hidden;
+}
+
+.subtitleCharacterHidden {
+  visibility: hidden;
+}
+
+.themeSwitch {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.themeSwitch:hover {
+  color: var(--fg);
+}
+
+.themeSwitch:focus-visible {
+  outline: 2px solid var(--btn-hover);
+  outline-offset: 2px;
 }
